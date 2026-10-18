@@ -23,8 +23,14 @@ module.exports = {
       const targetChannel = interaction.options.getChannel("channel");
       const amount = interaction.options.getNumber("amount");
       const messages = await targetChannel.messages.fetch({ limit: amount });
-
-      await Promise.all(messages.map((message) => message.delete()));
+      let deleted = 0;
+      await interaction.reply(
+        `Lösche... ${deleted.toString()} von ${messages.size} Nachrichten gelöscht.`,
+      );
+      for (const message of messages.values()) {
+        await message.delete();
+      }
+      await interaction.channel.send(`${messages.size} Nachrichten gelöscht.`);
     } catch (error) {
       console.error(error);
       await interaction.reply({
