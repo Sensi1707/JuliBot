@@ -9,7 +9,7 @@ module.exports = {
       option
         .setName("channel")
         .setDescription("channel für rename")
-        .setRequired(true),
+        .setRequired(false),
     )
     .addNumberOption((option) =>
       option
@@ -20,7 +20,8 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   async execute(interaction) {
     try {
-      const targetChannel = interaction.options.getChannel("channel");
+      const targetChannel =
+        interaction.options.getChannel("channel") || interaction.channel;
       const amount = interaction.options.getNumber("amount");
       const messages = await targetChannel.messages.fetch({ limit: amount });
       let deleted = 0;
