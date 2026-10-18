@@ -25,7 +25,7 @@ module.exports = {
       targetChannel.setName(newName);
 
       await interaction.reply("Pong!");
-    } catch {
+    } catch (error) {
       console.error(error);
       await interaction.reply(
         "Guild oder Channel konnte nicht gefunden werden.",

@@ -25,7 +25,7 @@ module.exports = {
       const messages = await targetChannel.messages.fetch({ limit: amount });
       await targetChannel.bulkDelete(messages, true);
       await interaction.reply(`${messages.size} Nachrichten gelöscht.`);
-    } catch {
+    } catch (error) {
       console.error(error);
       await interaction.reply({
         content: "Nachrichten konnten nicht gelöscht werden.",
