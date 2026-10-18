@@ -23,7 +23,9 @@ module.exports = {
       const targetChannel = interaction.options.getChannel("channel");
       const amount = interaction.options.getNumber("amount");
       const messages = await targetChannel.messages.fetch({ limit: amount });
-      await targetChannel.bulkDelete(messages, false);
+      for (const message of messages.values()) {
+        await message.delete();
+      }
       await interaction.reply(`${messages.size} Nachrichten gelöscht.`);
     } catch (error) {
       console.error(error);
