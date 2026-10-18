@@ -28,17 +28,45 @@ module.exports = {
       );
 
       let deleted = 0;
+      const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
 
       while (deleted < amount) {
-        const messages = await targetChannel.messages.fetch({ limit: 100 });
+        const messages = await targetChannel.messages.fetch({
+          limit: Math.min(100, Math.ceil(amount - deleted)),
+        });
+
         if (messages.size === 0) break;
 
-        for (const message of messages.values()) {
-          await message.delete();
-          deleted++;
+        const recent = messages.filter((m) => m.createdTimestamp > cutoff);
+        const old = messages.filter((m) => m.createdTimestamp <= cutoff);
+
+        let batchDeleted = 0;
+
+        if (recent.size >= 2) {
+          batchDeleted += (await targetChannel.bulkDelete(recent, true)).size;
+        } else if (recent.size === 1) {
+          await recent.first().delete();
+          batchDeleted++;
         }
+
+        const results = await Promise.allSettled(
+          old.map((message) => message.delete()),
+        );
+
+        batchDeleted += results.filter(
+          (result) => result.status === "fulfilled",
+        ).length;
+
+        if (batchDeleted === 0) break;
+
+        deleted += batchDeleted;
+
+        await interaction.editReply(
+          `Lösche... ${deleted}/${amount} Nachrichten gelöscht.`,
+        );
       }
-      await interaction.channel.send(`${deleted} Nachrichten gelöscht.`);
+
+      await interaction.editReply(`${deleted} Nachrichten gelöscht.`);
     } catch (error) {
       console.error(error);
       await interaction.editReply({
